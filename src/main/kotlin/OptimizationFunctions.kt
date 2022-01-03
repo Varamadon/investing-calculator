@@ -1,5 +1,6 @@
 import kotlin.math.abs
 
+const val delta: Double = 0.01
 const val goldenSection: Double = 1.618
 
 fun findMinimizationArgument(minimizedFunction: (Double) -> Double): Double {

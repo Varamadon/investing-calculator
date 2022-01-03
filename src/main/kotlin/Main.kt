@@ -1,7 +1,5 @@
 import kotlin.math.abs
 
-const val delta: Double = 0.01
-
 const val yearlyStockMultiplicationPercents: Double = 13.5
 const val yearlyBondsMultiplicationPercents: Double = 6.0
 const val inflationPercents: Double = 2.0
@@ -38,9 +36,9 @@ fun calcInflatedWantedMonthlyIncome(years: Int, wantedMonthlyIncome: Double): Do
 }
 
 fun calcNeededFunds(wantedMonthlyIncome: Double): Double {
-    val wantedYearlyIncomeWithTax = (wantedMonthlyIncome * 12.0) / ((1.0 - tax) * (1.0 - tariff))
-    val yearlyBondsAdding = yearlyBondsMultiplicationPercents / 100.0
-    return wantedYearlyIncomeWithTax / yearlyBondsAdding
+    val yearlyBondsMultiplication = 1.0 + (yearlyBondsMultiplicationPercents / 100.0)
+    val inflationMultiplication = 1.0 + (inflationPercents / 100.0)
+    return (wantedMonthlyIncome * 12.0) / ((yearlyBondsMultiplication - inflationMultiplication) * (1.0 - tax) * (1.0 - tariff))
 }
 
 fun calcEndSum(years: Int, monthlyInvest: Double): Double {
