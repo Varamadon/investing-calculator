@@ -11,7 +11,24 @@ const val tax: Double = 0.13
 
 
 fun main() {
-    println(calcMonthlyInvestByWantedIncomeAndYearsInvesting(40, 1000.0))
+    val wantedMonthlyIncome = 1000.0
+    val approxMonthlyInvest = 1330.0
+    val approxYears = calcYearsInvestingByWantedIncomeAndMonthlyInvest(approxMonthlyInvest, wantedMonthlyIncome)
+    println(approxYears)
+    val monthlyInvestByApproxYears = calcMonthlyInvestByWantedIncomeAndYearsInvesting(approxYears, wantedMonthlyIncome)
+    println(monthlyInvestByApproxYears)
+}
+
+fun calcYearsInvestingByWantedIncomeAndMonthlyInvest(
+    monthlyInvest: Double,
+    wantedMonthlyIncome: Double
+): Int {
+    return findMinimizationArgument {
+        val years = it.toInt()
+        val neededFunds = calcNeededFundsWithInflation(years, wantedMonthlyIncome)
+        val endSum = calcEndSum(years, monthlyInvest)
+        abs(endSum - neededFunds)
+    }.toInt()
 }
 
 fun calcMonthlyInvestByWantedIncomeAndYearsInvesting(
