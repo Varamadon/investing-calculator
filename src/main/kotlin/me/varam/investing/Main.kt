@@ -1,3 +1,6 @@
+package me.varam.investing
+
+import me.varam.investing.math.findMinimizationArgument
 import kotlin.math.abs
 
 const val yearlyStockMultiplicationPercents: Double = 13.5
@@ -8,7 +11,7 @@ const val tax: Double = 0.13
 
 
 fun main() {
-    println(calcMonthlyInvestByWantedIncomeAndYearsInvesting(20, 1000.0))
+    println(calcMonthlyInvestByWantedIncomeAndYearsInvesting(40, 1000.0))
 }
 
 fun calcMonthlyInvestByWantedIncomeAndYearsInvesting(
