@@ -2,7 +2,7 @@ package me.varam.investing.math
 
 import kotlin.math.abs
 
-const val delta: Double = 0.001
+const val delta: Double = 0.01
 const val goldenSection: Double = 1.618
 const val minimumPossibleArgument: Double = -100_000_000.0
 const val maximumPossibleArgument: Double = 100_000_000.0

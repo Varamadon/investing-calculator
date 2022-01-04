@@ -3,20 +3,21 @@ package me.varam.investing
 import me.varam.investing.math.findMinimizationArgument
 import kotlin.math.abs
 
-const val yearlyStockMultiplicationPercents: Double = 13.5
-const val yearlyBondsMultiplicationPercents: Double = 6.0
-const val inflationPercents: Double = 2.0
-const val tariff: Double = 0.003
-const val tax: Double = 0.13
+const val yearlyHighRiskMultiplicationPercents: Double = 12.0
+const val yearlyLowRiskMultiplicationPercents: Double = 8.0
+const val inflationPercents: Double = 4.0
+const val tariffPercent: Double = 0.3
+const val taxPercent: Double = 13.0
 
 
 fun main() {
-    val wantedMonthlyIncome = 1000.0
-    val approxMonthlyInvest = 1330.0
-    val approxYears = calcYearsInvestingByWantedIncomeAndMonthlyInvest(approxMonthlyInvest, wantedMonthlyIncome)
-    println(approxYears)
-    val monthlyInvestByApproxYears = calcMonthlyInvestByWantedIncomeAndYearsInvesting(approxYears, wantedMonthlyIncome)
-    println(monthlyInvestByApproxYears)
+    val wantedMonthlyIncome = 70000.0
+    val monthlyInvest = 25000.0
+    val years = 20
+    val yearsByMonthlyInvest = calcYearsInvestingByWantedIncomeAndMonthlyInvest(monthlyInvest, wantedMonthlyIncome)
+    println(yearsByMonthlyInvest)
+    val monthlyInvestByYears = calcMonthlyInvestByWantedIncomeAndYearsInvesting(years, wantedMonthlyIncome)
+    println(monthlyInvestByYears)
 }
 
 fun calcYearsInvestingByWantedIncomeAndMonthlyInvest(
@@ -48,7 +49,7 @@ fun calcNeededFundsWithInflation(years: Int, wantedMonthlyIncomeWithoutInflation
 
 fun calcInflatedWantedMonthlyIncome(years: Int, wantedMonthlyIncome: Double): Double {
     var income = wantedMonthlyIncome
-    val inflationMultiplication = 1.0 + inflationPercents / 100.0
+    val inflationMultiplication = inflationPercents.percentToMult()
     for (i in 1..years) {
         income *= inflationMultiplication
     }
@@ -56,9 +57,9 @@ fun calcInflatedWantedMonthlyIncome(years: Int, wantedMonthlyIncome: Double): Do
 }
 
 fun calcNeededFunds(wantedMonthlyIncome: Double): Double {
-    val yearlyBondsMultiplication = 1.0 + (yearlyBondsMultiplicationPercents / 100.0)
-    val inflationMultiplication = 1.0 + (inflationPercents / 100.0)
-    return (wantedMonthlyIncome * 12.0) / ((yearlyBondsMultiplication - inflationMultiplication) * (1.0 - tax) * (1.0 - tariff))
+    val yearlyMultiplication = yearlyLowRiskMultiplicationPercents.percentToMult()
+    val inflationMultiplication = inflationPercents.percentToMult()
+    return (wantedMonthlyIncome * 12.0) / ((yearlyMultiplication - inflationMultiplication) * taxPercent.percentToDec() * tariffPercent.percentToDec())
 }
 
 fun calcEndSum(years: Int, monthlyInvest: Double): Double {
@@ -73,17 +74,25 @@ fun calcEndSum(years: Int, monthlyInvest: Double): Double {
 }
 
 fun calcSumNextMonth(currentSum: Double, monthlyInvest: Double, yearlyMultiplicationPercents: Double): Double {
-    val monthlyMultiplication = 1.0 + (yearlyMultiplicationPercents / 12) / 100
-    return monthlyMultiplication * currentSum + monthlyMultiplication * (monthlyInvest * (1.0 - tariff))
+    val monthlyMultiplication = (yearlyMultiplicationPercents / 12).percentToMult()
+    return monthlyMultiplication * currentSum + monthlyMultiplication * (monthlyInvest * tariffPercent.percentToDec())
 }
 
 fun getMultiplicationPercentsByMonthsLeft(monthsLeft: Int): Double {
     val deductionMonths = 5 * 12
     return if (monthsLeft >= deductionMonths) {
-        yearlyStockMultiplicationPercents
+        yearlyHighRiskMultiplicationPercents
     } else {
         val deductValue =
-            (yearlyStockMultiplicationPercents - yearlyBondsMultiplicationPercents) / deductionMonths.toDouble()
-        yearlyBondsMultiplicationPercents + deductValue * monthsLeft
+            (yearlyHighRiskMultiplicationPercents - yearlyLowRiskMultiplicationPercents) / deductionMonths.toDouble()
+        yearlyLowRiskMultiplicationPercents + deductValue * monthsLeft
     }
+}
+
+fun Double.percentToMult(): Double {
+    return 1.0 + (this / 100.0)
+}
+
+fun Double.percentToDec(): Double {
+    return 1.0 - (this / 100.0)
 }
