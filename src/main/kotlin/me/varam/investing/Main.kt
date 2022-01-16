@@ -3,8 +3,8 @@ package me.varam.investing
 import me.varam.investing.math.findMinimizationArgument
 import kotlin.math.abs
 
-const val yearlyHighRiskMultiplicationPercents: Double = 12.0
-const val yearlyLowRiskMultiplicationPercents: Double = 8.0
+const val yearlyStocksMultiplicationPercent: Double = 8.1
+const val yearlySpendFundsPercent: Double = 3.0
 const val inflationPercents: Double = 4.0
 const val tariffPercent: Double = 0.3
 const val taxPercent: Double = 13.0
@@ -12,12 +12,10 @@ const val taxPercent: Double = 13.0
 
 fun main() {
     val wantedMonthlyIncome = 70000.0
-    val monthlyInvest = 25000.0
-    val years = 20
-    val yearsByMonthlyInvest = calcYearsInvestingByWantedIncomeAndMonthlyInvest(monthlyInvest, wantedMonthlyIncome)
-    println(yearsByMonthlyInvest)
-    val monthlyInvestByYears = calcMonthlyInvestByWantedIncomeAndYearsInvesting(years, wantedMonthlyIncome)
-    println(monthlyInvestByYears)
+    val monthlyInvest = 35000.0
+    val years = 30
+    println(calcNeededFundsWithInflation(years, wantedMonthlyIncome).toLong())
+    println(calcMonthlyInvestByWantedIncomeAndYearsInvesting(years, wantedMonthlyIncome))
 }
 
 fun calcYearsInvestingByWantedIncomeAndMonthlyInvest(
@@ -57,18 +55,18 @@ fun calcInflatedWantedMonthlyIncome(years: Int, wantedMonthlyIncome: Double): Do
 }
 
 fun calcNeededFunds(wantedMonthlyIncome: Double): Double {
-    val yearlyMultiplication = yearlyLowRiskMultiplicationPercents.percentToMult()
-    val inflationMultiplication = inflationPercents.percentToMult()
-    return (wantedMonthlyIncome * 12.0) / ((yearlyMultiplication - inflationMultiplication) * taxPercent.percentToDec() * tariffPercent.percentToDec())
+    val wantedIncomeWithTaxAndTariff = wantedMonthlyIncome / (taxPercent.percentToDec() * tariffPercent.percentToDec())
+    val yearlyIncome = wantedIncomeWithTaxAndTariff * 12
+    return yearlyIncome / (yearlySpendFundsPercent / 100.0)
 }
 
 fun calcEndSum(years: Int, monthlyInvest: Double): Double {
     var sum = 0.0
     val monthsInvesting = years * 12
+    var inflatedInvest = monthlyInvest
     for (i in 1..monthsInvesting) {
-        val monthsLeft = monthsInvesting - i
-        val yearlyMultiplicationPercents = getMultiplicationPercentsByMonthsLeft(monthsLeft)
-        sum = calcSumNextMonth(sum, monthlyInvest, yearlyMultiplicationPercents)
+        if (i % 12 == 0) inflatedInvest *= inflationPercents.percentToMult()
+        sum = calcSumNextMonth(sum, inflatedInvest, yearlyStocksMultiplicationPercent)
     }
     return sum
 }
@@ -78,16 +76,6 @@ fun calcSumNextMonth(currentSum: Double, monthlyInvest: Double, yearlyMultiplica
     return monthlyMultiplication * currentSum + monthlyMultiplication * (monthlyInvest * tariffPercent.percentToDec())
 }
 
-fun getMultiplicationPercentsByMonthsLeft(monthsLeft: Int): Double {
-    val deductionMonths = 5 * 12
-    return if (monthsLeft >= deductionMonths) {
-        yearlyHighRiskMultiplicationPercents
-    } else {
-        val deductValue =
-            (yearlyHighRiskMultiplicationPercents - yearlyLowRiskMultiplicationPercents) / deductionMonths.toDouble()
-        yearlyLowRiskMultiplicationPercents + deductValue * monthsLeft
-    }
-}
 
 fun Double.percentToMult(): Double {
     return 1.0 + (this / 100.0)
