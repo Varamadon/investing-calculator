@@ -1,23 +1,29 @@
 package me.varam.investing
 
 import kotlin.math.pow
+import kotlin.math.round
 
-const val mortgageRatePercent = 5.0
+const val mortgageRatePercent = 8.0
 const val realEstateRatePercent = 6.0
 
 fun main() {
-    val propertyCost = 12_000_000.0
-    val initialPayment = 2_500_000.0
+    val propertyCost = 15_000_000.0
+    val initialPayment = 3_000_000.0
     val years = 30
 
     val monthlyUpkeep = 30000.0
-    val rent = 50000.0
+    val rent = 70000.0
     val income = 200_000.0
 
+    val totalSumWithRent = calcTotalSumWithRent(years, income, rent, initialPayment)
+    val totalSumWithMortgage = calcTotalSumWithMortgage(years, income, monthlyUpkeep, propertyCost, initialPayment)
     println("With rent:")
-    println(calcTotalSumWithRent(years, income, rent, initialPayment).toLong())
-    println("With mortgage")
-    println(calcTotalSumWithMortgage(years, income, monthlyUpkeep, propertyCost, initialPayment).toLong())
+    println(totalSumWithRent.toLong())
+    println("With mortgage:")
+    println(totalSumWithMortgage.toLong())
+    println("Percent difference mortgage to rent:")
+    print((((totalSumWithMortgage / totalSumWithRent) - 1.0) * 100.0).round(2))
+    println(" %")
 }
 
 fun calcTotalSumWithRent(
@@ -77,5 +83,14 @@ fun calcPropertyCostNextMonth(propertyCost: Double, yearlyRealEstateRatePercent:
 fun calcMonthlyMortgagePayment(years: Int, totalLoan: Double): Double {
     val monthlyMortgageRate = mortgageRatePercent / 1200.0
     val months = years * 12.0
-    return (totalLoan * monthlyMortgageRate) / (1.0 - (1.0 + monthlyMortgageRate).pow(-1.0 * months))
+    val result = (totalLoan * monthlyMortgageRate) / (1.0 - (1.0 + monthlyMortgageRate).pow(-1.0 * months))
+    println("Mortgage payment:")
+    println(result.toLong())
+    return result
+}
+
+fun Double.round(decimals: Int): Double {
+    var multiplier = 1.0
+    repeat(decimals) { multiplier *= 10 }
+    return round(this * multiplier) / multiplier
 }
